@@ -11,42 +11,48 @@ type BookHandlers struct {
 	service *service.BookService
 }
 
+// NewBookHandlers cria uma nova instância de BookHandlers.
+func NewBookHandlers(service *service.BookService) *BookHandlers {
+	return &BookHandlers{service: service}
+}
+
 func (h *BookHandlers) GetBooks(w http.ResponseWriter, r *http.Request) {
 	books, err := h.service.GetBooks()
 	if err != nil {
-		http.Error(w, "failed to get Books", http.StatusInternalServerError)
+		http.Error(w, "failed to get books", http.StatusInternalServerError)
 		return
 	}
+
+	if len(books) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	// Alterando header p/informar dado retornoado tipo json
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(books)
 }
 
+// CreateBook lida com a requisição POST /books.
 func (h *BookHandlers) CreateBook(w http.ResponseWriter, r *http.Request) {
 	var book service.Book
-	// Transformando json em struct &[coletando da memoria]
-	err := json.NewDecoder(r.Body).Decode((&book))
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
 		http.Error(w, "invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	err = h.service.CreateBook(&book)
-	if err != nil {
+	if err := h.service.CreateBook(&book); err != nil {
 		http.Error(w, "failed to create book", http.StatusInternalServerError)
 		return
 	}
 
-	// Retorno caso não hava erro
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(book)
 }
 
-// GetBookByID lida com a requisição GET /book/{id}
+// GetBookByID lida com a requisição GET /books/{id}.
 func (h *BookHandlers) GetBookByID(w http.ResponseWriter, r *http.Request) {
-	// Capturando valor ID e gerando string
 	idStr := r.PathValue("id")
-	// Convertendo string para inteiro
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "invalid book ID", http.StatusBadRequest)
@@ -67,7 +73,7 @@ func (h *BookHandlers) GetBookByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(book)
 }
 
-// UpdateBook
+// UpdateBook lida com a requisição PUT /books/{id}.
 func (h *BookHandlers) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
@@ -81,19 +87,18 @@ func (h *BookHandlers) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request payload", http.StatusBadRequest)
 		return
 	}
-
 	book.ID = id
 
 	if err := h.service.UpdateBook(&book); err != nil {
 		http.Error(w, "failed to update book", http.StatusInternalServerError)
 		return
 	}
-	// Retornando dados do Book com alteração realizada
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(book)
 }
 
-// Deleta e lida com a requisição DELETE /books/{id}
+// DeleteBook lida com a requisição DELETE /books/{id}.
 func (h *BookHandlers) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
@@ -107,6 +112,5 @@ func (h *BookHandlers) DeleteBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Retornando status sem conteudo
 	w.WriteHeader(http.StatusNoContent)
 }
