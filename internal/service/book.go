@@ -53,6 +53,8 @@ func (s *BookService) GetBooks() ([]Book, error) {
 			return nil, err
 		}
 		books = append(books, book)
+
+		//print(err)
 	}
 
 	return books, nil

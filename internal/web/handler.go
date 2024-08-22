@@ -20,6 +20,7 @@ func (h *BookHandlers) GetBooks(w http.ResponseWriter, r *http.Request) {
 	books, err := h.service.GetBooks()
 	if err != nil {
 		http.Error(w, "failed to get books", http.StatusInternalServerError)
+
 		return
 	}
 

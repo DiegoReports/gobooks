@@ -1,2 +1,26 @@
 GET http://localhost:8080/books
 Accept: application/json
+
+### Add new book
+POST http://localhost:8080/books
+Content-Type: application/json
+
+{
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "genre": "Software Engineering"
+}
+
+### Get book by id
+GET http://localhost:8080/books/2
+Accept: application/json
+
+### Update book by id
+PUT http://localhost:8080/books/2
+Content-Type: application/json
+
+{
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "genre": "Software Development"
+}
